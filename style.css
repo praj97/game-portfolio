@@ -1,0 +1,1852 @@
+* {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #00ff00;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        /* Scanline effect */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        /* Start Screen */
+        #start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: opacity 0.5s ease-out;
+        }
+
+        #start-screen.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .start-title {
+            font-size: 48px;
+            color: #00ff00;
+            text-shadow: 
+                2px 2px 0 #00aa00,
+                4px 4px 0 rgba(0, 255, 0, 0.3),
+                0 0 20px #00ff00;
+            margin-bottom: 60px;
+            animation: pulse 2s infinite;
+        }
+
+        .press-start-btn {
+            padding: 25px 50px;
+            background: transparent;
+            border: 6px solid #00ff00;
+            color: #00ff00;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 20px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+            letter-spacing: 2px;
+            animation: blink 1.5s infinite;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .press-start-btn:hover {
+            background: #00ff00;
+            color: #000;
+            box-shadow: 
+                0 0 30px rgba(0, 255, 0, 0.8),
+                inset 0 0 20px rgba(0, 255, 0, 0.3);
+            animation: none;
+        }
+
+        .press-start-btn:active {
+            transform: scale(0.95);
+        }
+
+        .insert-coin {
+            position: absolute;
+            bottom: 50px;
+            font-size: 14px;
+            color: #00aa00;
+            text-shadow: 0 0 10px #000;
+        }
+
+        /* Portfolio Screen (hidden initially) */
+        #portfolio-screen {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease-in 0.5s;
+            position: relative;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #portfolio-screen.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        #tetris-bg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 1;
+            z-index: 0;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        .game-container {
+            width: 95%;
+            max-width: 1100px;
+            border: 8px solid #00ff00;
+            border-radius: 0;
+            background: rgba(0, 0, 0, 0);
+            padding: 60px;
+            margin: 20px;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 0, 0.5),
+                inset 0 0 30px rgba(0, 255, 0, 0.1);
+            position: relative;
+            z-index: 10;
+        }
+
+        .corner {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 4px solid #00ff00;
+        }
+
+        .corner.top-left {
+            top: -4px;
+            left: -4px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .corner.top-right {
+            top: -4px;
+            right: -4px;
+            border-left: none;
+            border-bottom: none;
+        }
+
+        .corner.bottom-left {
+            bottom: -4px;
+            left: -4px;
+            border-right: none;
+            border-top: none;
+        }
+
+        .corner.bottom-right {
+            bottom: -4px;
+            right: -4px;
+            border-left: none;
+            border-top: none;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 36px;
+            color: #00ff00;
+            text-shadow: 
+                2px 2px 0 #00aa00,
+                4px 4px 0 rgba(0, 255, 0, 0.3),
+                0 0 10px #000,
+                0 0 20px #000,
+                0 0 30px #000;
+            margin-bottom: 10px;
+            animation: glitch 3s infinite;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 14px;
+            color: #00cc00;
+            margin-bottom: 40px;
+            letter-spacing: 2px;
+            text-shadow: 
+                0 0 5px #000,
+                0 0 10px #000,
+                0 0 15px #000,
+                2px 2px 0 #000;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            min-height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ================================================
+           TYPEWRITER GREETING ANIMATION SYSTEM
+           ================================================
+           Types out greetings character by character, then
+           backspaces and types the next greeting
+           
+           Animation Flow:
+           1. Type out greeting character by character (80ms/char)
+           2. Display complete greeting (3500ms)
+           3. Backspace greeting character by character (50ms/char)
+           4. Repeat with next greeting
+           
+           Performance:
+           - Blinking cursor animation
+           - Smooth character transitions
+           - No layout shifts
+           ================================================ */
+
+        .rotating-greeting {
+            width: 100%;
+        }
+
+        .greeting-text {
+            display: inline;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .typewriter-cursor {
+            display: inline-block;
+            width: 10px;
+            height: 16px;
+            background: #00ff00;
+            margin-left: 4px;
+            animation: cursor-blink 1s infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes cursor-blink {
+            0%, 49% {
+                opacity: 1;
+            }
+            50%, 100% {
+                opacity: 0;
+            }
+        }
+
+        /* Respect reduced motion preference */
+        @media (prefers-reduced-motion: reduce) {
+            .typewriter-cursor {
+                animation: none;
+                opacity: 1;
+            }
+        }
+
+        .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .menu-item {
+            width: 100%;
+            max-width: 600px;
+            padding: 22px 35px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 4px solid #00ff00;
+            color: #00ff00;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 18px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.1s;
+            text-align: center;
+            letter-spacing: 2px;
+            text-shadow: 
+                0 0 5px #000,
+                0 0 10px #000,
+                2px 2px 0 #000;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .menu-item::before {
+            content: '►';
+            position: absolute;
+            left: 10px;
+            opacity: 0;
+            transition: opacity 0.1s;
+        }
+
+        .menu-item:hover {
+            background: #00ff00;
+            color: #000;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 0, 0.8),
+                inset 0 0 10px rgba(0, 255, 0, 0.3);
+            transform: translateX(10px);
+            text-shadow: none;
+        }
+
+        .menu-item:hover::before {
+            opacity: 1;
+        }
+
+        .menu-item:active {
+            transform: translateX(10px) scale(0.98);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            margin-bottom: 30px;
+            padding: 25px;
+            border-top: 2px dashed #00ff00;
+            border-bottom: 2px dashed #00ff00;
+            font-size: 11px;
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            color: #00aa00;
+            margin-bottom: 5px;
+            text-shadow: 
+                0 0 5px #000,
+                1px 1px 0 #000;
+        }
+
+        .stat-value {
+            color: #00ff00;
+            font-size: 16px;
+            text-shadow: 
+                0 0 5px #000,
+                0 0 10px #000,
+                2px 2px 0 #000;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes blink {
+            0%, 50%, 100% {
+                opacity: 1;
+            }
+            25%, 75% {
+                opacity: 0.3;
+            }
+        }
+
+        /*@keyframes glitch {
+            0%, 90%, 100% {
+                transform: translate(0);
+            }
+            92% {
+                transform: translate(-2px, 1px);
+            }
+            94% {
+                transform: translate(2px, -1px);
+            }
+            96% {
+                transform: translate(-1px, 2px);
+            }
+        }*/
+
+        /* Modal Dialog Box */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1001;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-box {
+            background: rgba(0, 0, 0, 0.95);
+            border: 6px solid #00ff00;
+            padding: 0;
+            max-width: 600px;
+            width: 90%;
+            
+            box-shadow: 
+                0 0 30px rgba(0, 255, 0, 0.6),
+                inset 0 0 20px rgba(0, 255, 0, 0.1);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            background: rgba(0, 255, 0, 0.1);
+            border-bottom: 4px solid #00ff00;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            color: #00ff00;
+            text-shadow: 
+                0 0 10px #000,
+                2px 2px 0 #000;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: 3px solid #00ff00;
+            color: #00ff00;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 16px;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .modal-close:hover {
+            background: #ff0000;
+            border-color: #ff0000;
+            color: #000;
+        }
+
+        .modal-content {
+            padding: 30px;
+            color: #00ff00;
+            font-size: 12px;
+            line-height: 1.8;
+            text-shadow: 
+                0 0 5px #000,
+                1px 1px 0 #000;
+        }
+
+        .modal-content p {
+            margin: 0;
+        }
+
+        .modal-footer {
+            background: rgba(0, 255, 0, 0.1);
+            border-top: 4px solid #00ff00;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .modal-btn {
+            padding: 15px 40px;
+            background: transparent;
+            border: 4px solid #00ff00;
+            color: #00ff00;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-shadow: 
+                0 0 5px #000,
+                1px 1px 0 #000;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .modal-btn:hover {
+            background: #00ff00;
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
+            text-shadow: none;
+        }
+
+        .modal-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Projects Grid & Cards */
+        .projects-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1002;
+            overflow-y: auto;
+            padding: 40px 20px;
+        }
+
+        .projects-container.show {
+            display: block;
+        }
+
+        .projects-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100%;
+            padding: 80px 20px 40px;
+        }
+
+        .projects-box {
+            width: 95%;
+            max-width: 1400px;
+            border: 8px solid #00ff00;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 40px;
+            position: relative;
+            box-shadow: 
+                0 0 30px rgba(0, 255, 0, 0.5),
+                inset 0 0 40px rgba(0, 255, 0, 0.1);
+            max-height: calc(100vh - 140px);
+            overflow-y: auto;
+        }
+
+        /* Custom scrollbar for projects container */
+        .projects-container::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        .projects-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .projects-container::-webkit-scrollbar-thumb {
+            background: #00ff00;
+            border: 2px solid rgba(0, 0, 0, 0.5);
+        }
+
+        .projects-container::-webkit-scrollbar-thumb:hover {
+            background: #00cc00;
+        }
+
+        .project-modal-content::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .project-modal-content::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .project-modal-content::-webkit-scrollbar-thumb {
+            background: #00ff00;
+            border: 2px solid rgba(0, 0, 0, 0.5);
+        }
+
+        .projects-box::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .projects-box::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .projects-box::-webkit-scrollbar-thumb {
+            background: #00ff00;
+            border: 2px solid rgba(0, 0, 0, 0.3);
+        }
+
+        .projects-box::-webkit-scrollbar-thumb:hover {
+            background: #00cc00;
+        }
+
+        .projects-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 4px solid #00ff00;
+        }
+
+        .projects-title {
+            font-size: 32px;
+            color: #00ff00;
+            text-shadow: 
+                0 0 10px #000,
+                2px 2px 0 #000,
+                0 0 20px #00ff00;
+            margin-bottom: 20px;
+        }
+
+        .projects-close {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: 4px solid #00ff00;
+            color: #00ff00;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 16px;
+            padding: 15px 30px;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 1003;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        .projects-close:hover {
+            background: #ff0000;
+            border-color: #ff0000;
+            color: #000;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .project-card {
+            position: relative;
+            background: rgba(0, 0, 0, 0.8);
+            border: 4px solid #00ff00;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+            aspect-ratio: 4/3;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 255, 0, 0.4);
+            border-color: #00ff00;
+        }
+
+        .project-card:active {
+            transform: translateY(-2px);
+        }
+
+        .project-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+
+        .project-card:hover .project-image {
+            transform: scale(1.05);
+        }
+
+        .project-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 255, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+            pointer-events: none;
+        }
+
+        .project-card:hover .project-overlay {
+            opacity: 1;
+        }
+
+        .project-name {
+            font-size: 16px;
+            color: #000;
+            text-align: center;
+            padding: 20px;
+            text-shadow: none;
+            letter-spacing: 1px;
+        }
+
+        /* Project Detail Modal */
+        .project-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1004;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .project-modal.show {
+            display: flex;
+        }
+
+        .project-modal-content {
+            background: rgba(0, 0, 0, 0.95);
+            border: 6px solid #00ff00;
+            padding: 0;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 
+                0 0 40px rgba(0, 255, 0, 0.6),
+                inset 0 0 30px rgba(0, 255, 0, 0.1);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        .project-modal-header {
+            background: rgba(0, 255, 0, 0.1);
+            border-bottom: 4px solid #00ff00;
+            padding: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .project-modal-title {
+            font-size: 22px;
+            color: #00ff00;
+            text-shadow: 
+                0 0 10px #000,
+                2px 2px 0 #000;
+        }
+
+        .project-modal-close {
+            background: transparent;
+            border: 3px solid #00ff00;
+            color: #00ff00;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 16px;
+            width: 45px;
+            height: 45px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        .project-modal-close:hover {
+            background: #ff0000;
+            border-color: #ff0000;
+            color: #000;
+        }
+
+        .project-modal-body {
+            padding: 30px;
+        }
+
+        .project-modal-image {
+            width: 100%;
+            height: auto;
+            border: 3px solid #00ff00;
+            margin-bottom: 25px;
+        }
+
+        .project-modal-description {
+            color: #00ff00;
+            font-size: 12px;
+            line-height: 1.8;
+            text-shadow: 
+                0 0 5px #000,
+                1px 1px 0 #000;
+            margin-bottom: 25px;
+        }
+
+        .project-modal-link {
+            display: inline-block;
+            padding: 15px 35px;
+            background: transparent;
+            border: 4px solid #00ff00;
+            color: #00ff00;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 12px;
+            text-decoration: none;
+            transition: all 0.2s;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        .project-modal-link:hover {
+            background: #00ff00;
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
+        }
+
+        .project-modal-link:active {
+            transform: scale(0.95);
+        }
+
+        .project-modal-link.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        /* ================================================
+           SKILLS SECTION
+           ================================================
+           Grid layout with animated progress bars
+           - Fills from 0% to skill level on display
+           - Color-coded by proficiency level
+           - Responsive 2-column to 1-column layout
+           ================================================ */
+
+        .skills-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1002;
+            overflow-y: auto;
+            padding: 40px 20px;
+        }
+
+        .skills-container.show {
+            display: block;
+        }
+
+        .skills-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100%;
+            padding: 80px 20px 40px;
+        }
+
+        .skills-box {
+            width: 95%;
+            max-width: 900px;
+            border: 8px solid #00ff00;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 40px;
+            position: relative;
+            box-shadow: 
+                0 0 30px rgba(0, 255, 0, 0.5),
+                inset 0 0 40px rgba(0, 255, 0, 0.1);
+            max-height: calc(100vh - 140px);
+            overflow-y: auto;
+        }
+
+        .skills-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 4px solid #00ff00;
+        }
+
+        .skills-title {
+            font-size: 32px;
+            color: #00ff00;
+            text-shadow: 
+                0 0 10px #000,
+                2px 2px 0 #000,
+                0 0 20px #00ff00;
+            margin-bottom: 20px;
+        }
+
+        .skills-close {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: 4px solid #00ff00;
+            color: #00ff00;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 16px;
+            padding: 15px 30px;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 1003;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        .skills-close:hover {
+            background: #ff0000;
+            border-color: #ff0000;
+            color: #000;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+        }
+
+        .skill-item {
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid #00ff00;
+            padding: 20px;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .skill-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 255, 0, 0.3);
+        }
+
+        .skill-name {
+            font-size: 14px;
+            color: #00ff00;
+            margin-bottom: 15px;
+            text-shadow: 
+                0 0 5px #000,
+                1px 1px 0 #000;
+            letter-spacing: 1px;
+        }
+
+        .skill-level-container {
+            margin-bottom: 10px;
+        }
+
+        .skill-bar-background {
+            width: 100%;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #00ff00;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skill-bar-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 1.5s ease-out;
+            position: relative;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        /* Animated fill effect */
+        .skill-bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent
+            );
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        /* Color-coded by proficiency level */
+        .skill-bar-fill.level-expert {
+            background: #00ff00;
+            color: #00ff00;
+        }
+
+        .skill-bar-fill.level-advanced {
+            background: #00aaff;
+            color: #00aaff;
+        }
+
+        .skill-bar-fill.level-intermediate {
+            background: #ffaa00;
+            color: #ffaa00;
+        }
+
+        .skill-percentage {
+            font-size: 16px;
+            color: #00ff00;
+            text-align: right;
+            margin-top: 8px;
+            text-shadow: 
+                0 0 5px #000,
+                1px 1px 0 #000;
+            font-weight: bold;
+        }
+
+        /* Custom scrollbar for skills box */
+        .skills-box::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .skills-box::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .skills-box::-webkit-scrollbar-thumb {
+            background: #00ff00;
+            border: 2px solid rgba(0, 0, 0, 0.3);
+        }
+
+        .skills-box::-webkit-scrollbar-thumb:hover {
+            background: #00cc00;
+        }
+
+        /* Custom scrollbar for skills container */
+        .skills-container::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        .skills-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .skills-container::-webkit-scrollbar-thumb {
+            background: #00ff00;
+            border: 2px solid rgba(0, 0, 0, 0.5);
+        }
+
+        .skills-container::-webkit-scrollbar-thumb:hover {
+            background: #00cc00;
+        }
+
+        /* Respect reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            .skill-bar-fill {
+                transition: width 0.5s ease-out;
+            }
+
+            .skill-bar-fill::after {
+                animation: none;
+            }
+
+            .skill-item:hover {
+                transform: none;
+            }
+        }
+
+        /* Responsive - Tablet */
+        @media (min-width: 1024px) {
+            .game-container {
+                width: 90%;
+                max-width: 700px;
+                padding: 40px 30px;
+                margin: 15px;
+            }
+
+            .title {
+                font-size: 26px;
+                padding: 10px;
+            }
+
+            .subtitle {
+                font-size: 11px;
+                min-height: 45px;
+                padding: 10px;
+            }
+
+            .typewriter-cursor {
+                width: 8px;
+                height: 13px;
+            }
+
+            .stats {
+                font-size: 9px;
+                padding: 15px;
+                margin-top: 18px;
+                margin-bottom: 25px;
+            }
+
+            .stat-value {
+                font-size: 12px;
+            }
+
+            .menu-item {
+                font-size: 14px;
+                padding: 18px 25px;
+            }
+
+            #tetris-bg {
+                transform: translate(-50%, -50%) scale(0.85);
+            }
+
+            .modal-box {
+                width: 85%;
+            }
+
+            .projects-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 25px;
+            }
+
+            .projects-box {
+                width: 92%;
+                padding: 35px;
+                border: 6px solid #00ff00;
+            }
+
+            .projects-wrapper {
+                padding: 70px 15px 35px;
+            }
+
+            .project-name {
+                font-size: 14px;
+            }
+
+            .projects-title {
+                font-size: 28px;
+            }
+
+            .skills-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 25px;
+            }
+
+            .skills-box {
+                width: 92%;
+                padding: 35px;
+                border: 6px solid #00ff00;
+            }
+
+            .skills-wrapper {
+                padding: 70px 15px 35px;
+            }
+
+            .skills-title {
+                font-size: 28px;
+            }
+
+            .skill-name {
+                font-size: 12px;
+            }
+
+            .skill-percentage {
+                font-size: 14px;
+            }
+
+            .skills-close {
+                font-size: 14px;
+                padding: 12px 25px;
+            }
+        }
+
+        /* Responsive - Mobile */
+        @media (min-width: 768px) {
+            .start-title {
+                font-size: 22px;
+                padding: 0 20px;
+            }
+
+            .press-start-btn {
+                font-size: 12px;
+                padding: 18px 35px;
+            }
+
+            .insert-coin {
+                font-size: 10px;
+                padding: 0 20px;
+                text-align: center;
+            }
+
+            .game-container {
+                padding: 25px 18px;
+                width: 92%;
+                margin: 12px;
+                border: 6px solid #00ff00;
+            }
+
+            .title {
+                font-size: 18px;
+                padding: 10px;
+            }
+
+            .subtitle {
+                font-size: 10px;
+                padding: 10px;
+                min-height: 42px;
+                margin-bottom: 25px;
+                letter-spacing: 1px;
+            }
+
+            .greeting-text {
+                white-space: normal;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                line-height: 1.4;
+            }
+
+            .typewriter-cursor {
+                width: 6px;
+                height: 10px;
+                margin-left: 2px;
+            }
+
+            .menu-item {
+                font-size: 11px;
+                padding: 14px 18px;
+                border: 3px solid #00ff00;
+                letter-spacing: 1px;
+            }
+
+            .menu-item::before {
+                left: 8px;
+                font-size: 10px;
+            }
+
+            .menu {
+                gap: 15px;
+            }
+
+            .stats {
+                font-size: 8px;
+                padding: 15px;
+                margin-top: 15px;
+                margin-bottom: 20px;
+            }
+
+            .stat-value {
+                font-size: 10px;
+            }
+
+            .corner {
+                width: 15px;
+                height: 15px;
+                border: 3px solid #00ff00;
+            }
+
+            .corner.top-left {
+                top: -3px;
+                left: -3px;
+            }
+
+            .corner.top-right {
+                top: -3px;
+                right: -3px;
+            }
+
+            .corner.bottom-left {
+                bottom: -3px;
+                left: -3px;
+            }
+
+            .corner.bottom-right {
+                bottom: -3px;
+                right: -3px;
+            }
+
+            .modal-box {
+                width: 92%;
+                border: 4px solid #00ff00;
+            }
+
+            .modal-header {
+                padding: 15px;
+            }
+
+            .modal-title {
+                font-size: 12px;
+            }
+
+            .modal-content {
+                font-size: 9px;
+                padding: 20px 15px;
+                line-height: 1.7;
+            }
+
+            .modal-footer {
+                padding: 15px;
+            }
+
+            .modal-btn {
+                font-size: 11px;
+                padding: 12px 28px;
+                border: 3px solid #00ff00;
+            }
+
+            .modal-close {
+                width: 32px;
+                height: 32px;
+                font-size: 12px;
+                border: 2px solid #00ff00;
+            }
+
+            #tetris-bg {
+                transform: translate(-50%, -50%) scale(0.6);
+            }
+
+            .projects-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .projects-box {
+                width: 95%;
+                padding: 25px 18px;
+                border: 5px solid #00ff00;
+            }
+
+            .projects-wrapper {
+                padding: 60px 10px 30px;
+            }
+
+            .projects-header {
+                margin-bottom: 30px;
+                padding-bottom: 15px;
+                border-bottom: 3px solid #00ff00;
+            }
+
+            .project-card {
+                max-width: 100%;
+            }
+
+            .project-name {
+                font-size: 11px;
+                padding: 15px;
+            }
+
+            .projects-title {
+                font-size: 20px;
+            }
+
+            .projects-close {
+                font-size: 10px;
+                padding: 12px 20px;
+                top: 15px;
+                right: 15px;
+            }
+
+            .project-modal-content {
+                width: 95%;
+                border: 4px solid #00ff00;
+            }
+
+            .project-modal-header {
+                padding: 18px;
+            }
+
+            .project-modal-title {
+                font-size: 14px;
+            }
+
+            .project-modal-close {
+                width: 36px;
+                height: 36px;
+                font-size: 12px;
+            }
+
+            .project-modal-body {
+                padding: 20px;
+            }
+
+            .project-modal-description {
+                font-size: 10px;
+                line-height: 1.7;
+            }
+
+            .project-modal-link {
+                font-size: 10px;
+                padding: 12px 25px;
+            }
+
+            .skills-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .skills-box {
+                width: 95%;
+                padding: 25px 18px;
+                border: 5px solid #00ff00;
+            }
+
+            .skills-wrapper {
+                padding: 60px 10px 30px;
+            }
+
+            .skills-header {
+                margin-bottom: 30px;
+                padding-bottom: 15px;
+                border-bottom: 3px solid #00ff00;
+            }
+
+            .skills-title {
+                font-size: 20px;
+            }
+
+            .skills-close {
+                font-size: 10px;
+                padding: 12px 20px;
+                top: 15px;
+                right: 15px;
+            }
+
+            .skill-item {
+                padding: 15px;
+            }
+
+            .skill-name {
+                font-size: 10px;
+                margin-bottom: 12px;
+            }
+
+            .skill-bar-background {
+                height: 16px;
+            }
+
+            .skill-percentage {
+                font-size: 12px;
+            }
+        }
+
+        /* Responsive - Small Mobile */
+        @media (max-width: 480px) {
+            .start-title {
+                font-size: 16px;
+                padding: 0 15px;
+            }
+
+            .press-start-btn {
+                font-size: 10px;
+                padding: 15px 28px;
+                border: 4px solid #00ff00;
+            }
+
+            .insert-coin {
+                font-size: 8px;
+                bottom: 30px;
+            }
+
+            .game-container {
+                padding: 18px 12px;
+                margin: 8px;
+                border: 5px solid #00ff00;
+            }
+
+            .title {
+                font-size: 14px;
+                padding: 8px;
+            }
+
+            .subtitle {
+                font-size: 8px;
+                margin-bottom: 18px;
+                min-height: 36px;
+                padding: 8px;
+            }
+
+            .greeting-text {
+                line-height: 1.5;
+            }
+
+            .typewriter-cursor {
+                width: 5px;
+                height: 8px;
+                margin-left: 2px;
+            }
+
+            .stats {
+                font-size: 6px;
+                padding: 10px;
+                margin-top: 12px;
+                margin-bottom: 15px;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .stat-item {
+                flex: 1 1 45%;
+                min-width: 80px;
+            }
+
+            .stat-value {
+                font-size: 8px;
+            }
+
+            .menu {
+                gap: 12px;
+            }
+
+            .menu-item {
+                font-size: 9px;
+                padding: 11px 14px;
+            }
+
+            .menu-item::before {
+                font-size: 8px;
+            }
+
+            .corner {
+                width: 12px;
+                height: 12px;
+            }
+
+            .modal-box {
+                width: 95%;
+            }
+
+            .modal-title {
+                font-size: 10px;
+            }
+
+            .modal-content {
+                font-size: 8px;
+                padding: 15px 12px;
+                line-height: 1.6;
+            }
+
+            .modal-btn {
+                font-size: 9px;
+                padding: 10px 22px;
+            }
+
+            .modal-close {
+                width: 28px;
+                height: 28px;
+                font-size: 10px;
+            }
+
+            #tetris-bg {
+                transform: translate(-50%, -50%) scale(0.45);
+            }
+
+            .projects-container {
+                padding: 30px 15px;
+            }
+
+            .projects-wrapper {
+                padding: 50px 5px 25px;
+            }
+
+            .projects-box {
+                width: 96%;
+                padding: 20px 12px;
+                border: 4px solid #00ff00;
+            }
+
+            .projects-header {
+                margin-bottom: 30px;
+            }
+
+            .projects-title {
+                font-size: 16px;
+            }
+
+            .projects-close {
+                font-size: 8px;
+                padding: 10px 15px;
+                border: 3px solid #00ff00;
+            }
+
+            .project-name {
+                font-size: 9px;
+                padding: 12px;
+            }
+
+            .project-modal-title {
+                font-size: 11px;
+            }
+
+            .project-modal-description {
+                font-size: 8px;
+            }
+
+            .project-modal-link {
+                font-size: 8px;
+                padding: 10px 20px;
+                border: 3px solid #00ff00;
+            }
+
+            .skills-container {
+                padding: 30px 15px;
+            }
+
+            .skills-wrapper {
+                padding: 50px 5px 25px;
+            }
+
+            .skills-box {
+                width: 96%;
+                padding: 20px 12px;
+                border: 4px solid #00ff00;
+            }
+
+            .skills-header {
+                margin-bottom: 30px;
+            }
+
+            .skills-title {
+                font-size: 16px;
+            }
+
+            .skills-close {
+                font-size: 8px;
+                padding: 10px 15px;
+                border: 3px solid #00ff00;
+            }
+
+            .skill-item {
+                padding: 12px;
+            }
+
+            .skill-name {
+                font-size: 8px;
+                margin-bottom: 10px;
+            }
+
+            .skill-bar-background {
+                height: 14px;
+            }
+
+            .skill-percentage {
+                font-size: 10px;
+            }
+
+            .skills-grid {
+                gap: 15px;
+            }
+        }
+
+        /* Landscape mode for mobile */
+        @media (max-height: 650px) and (orientation: landscape) {
+            .game-container {
+                padding: 12px 15px;
+                margin: 8px;
+            }
+
+            .title {
+                font-size: 16px;
+                margin-bottom: 5px;
+                padding: 8px;
+            }
+
+            .stats {
+                margin-top: 8px;
+                margin-bottom: 12px;
+                padding: 10px;
+                font-size: 7px;
+            }
+
+            .stat-value {
+                font-size: 9px;
+            }
+
+            .subtitle {
+                margin-bottom: 12px;
+                min-height: 32px;
+                font-size: 9px;
+            }
+
+            .menu {
+                gap: 8px;
+            }
+
+            .menu-item {
+                padding: 10px 15px;
+                font-size: 10px;
+            }
+
+            #tetris-bg {
+                transform: translate(-50%, -50%) scale(0.5);
+            }
+
+            .modal-box {
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+
+            .projects-wrapper {
+                padding: 50px 15px 25px;
+            }
+
+            .projects-box {
+                padding: 20px;
+                max-height: 85vh;
+                overflow-y: auto;
+            }
+
+            .projects-header {
+                margin-bottom: 20px;
+                padding-bottom: 12px;
+            }
+
+            .projects-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 15px;
+            }
+
+            .skills-wrapper {
+                padding: 50px 15px 25px;
+            }
+
+            .skills-box {
+                padding: 20px;
+                max-height: 85vh;
+                overflow-y: auto;
+            }
+
+            .skills-header {
+                margin-bottom: 20px;
+                padding-bottom: 12px;
+            }
+
+            .skills-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+
+            .skill-item {
+                padding: 12px;
+            }
+        }
+
+        /* Very small screens */
+        @media (max-width: 360px) {
+            .start-title {
+                font-size: 14px;
+            }
+
+            .press-start-btn {
+                font-size: 9px;
+                padding: 12px 22px;
+            }
+
+            .game-container {
+                padding: 15px 10px;
+            }
+
+            .title {
+                font-size: 12px;
+            }
+
+            .subtitle {
+                font-size: 7px;
+                min-height: 32px;
+            }
+
+            .menu-item {
+                font-size: 8px;
+                padding: 10px 12px;
+            }
+
+            #tetris-bg {
+                transform: translate(-50%, -50%) scale(0.35);
+            }
+
+            .projects-box {
+                width: 98%;
+                padding: 15px 10px;
+                border: 3px solid #00ff00;
+            }
+
+            .projects-wrapper {
+                padding: 45px 3px 20px;
+            }
+
+            .projects-header {
+                margin-bottom: 20px;
+                padding-bottom: 12px;
+            }
+
+            .projects-grid {
+                gap: 15px;
+            }
+
+            .skills-box {
+                width: 98%;
+                padding: 15px 10px;
+                border: 3px solid #00ff00;
+            }
+
+            .skills-wrapper {
+                padding: 45px 3px 20px;
+            }
+
+            .skills-header {
+                margin-bottom: 20px;
+                padding-bottom: 12px;
+            }
+
+            .skills-grid {
+                gap: 12px;
+            }
+
+            .skill-item {
+                padding: 10px;
+            }
+
+            .skill-name {
+                font-size: 7px;
+            }
+
+            .skill-bar-background {
+                height: 12px;
+            }
+
+            .skill-percentage {
+                font-size: 9px;
+            }
+        }
