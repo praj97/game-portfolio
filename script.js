@@ -167,11 +167,11 @@ function startGame() {
                     openSkills();
                 }
                 
-                // Visual feedback
-                this.style.background = '#00ff00';
+                // Visual feedback - use class instead of inline style to avoid hover conflicts
+                /*this.classList.add('menu-item-clicked');
                 setTimeout(() => {
-                    this.style.background = 'rgba(0, 0, 0, 0.7)';
-                }, 100);
+                    this.classList.remove('menu-item-clicked');
+                }, 100);*/
             });
         });
 
